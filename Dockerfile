@@ -47,7 +47,45 @@ FROM base as downloader
 ARG HUGGINGFACE_ACCESS_TOKEN
 ARG MODEL_TYPE
 
-# Change working directory to ComfyUI
+RUN git clone https://github.com/rgthree/rgthree-comfy.git /comfyui/custom_nodes/rgthree-comfy
+RUN cd /comfyui/custom_nodes/rgthree-comfy && \
+    pip3 install --upgrade -r requirements.txt 
+
+
+    # Clone ComfyUI-PuLID-Flux into ComfyUI custom_nodes
+
+RUN git clone https://github.com/balazik/ComfyUI-PuLID-Flux.git /comfyui/custom_nodes/ComfyUI-PuLID-Flux
+# Install ComfyUI-PuLID-Flux dependencies
+RUN cd /comfyui/custom_nodes/ComfyUI-PuLID-Flux && \
+    pip3 install --upgrade -r requirements.txt
+RUN cd /comfyui/models && \
+    mkdir pulid && \
+    mkddir insightface && \
+    cd pulid && \
+    wget https://huggingface.co/guozinan/PuLID/resolve/main/pulid_flux_v0.9.0.safetensors
+
+RUN cd /comfyui/models/clip &&\
+    wget https://huggingface.co/QuanSun/EVA-CLIP/resolve/main/EVA02_CLIP_L_336_psz14_s6B.pt
+
+RUN cd /comfyui/models/insightface && \
+    mkdir models && \
+    cd models && \
+    mkdir antelopev2 && \
+    cd antelopev2 && \
+    wget https://huggingface.co/MonsterMMORPG/tools/resolve/main/1k3d68.onnx && \
+    wget https://huggingface.co/MonsterMMORPG/tools/resolve/main/2d106det.onnx && \
+    wget https://huggingface.co/MonsterMMORPG/tools/resolve/main/genderage.onnx && \
+    wget https://huggingface.co/MonsterMMORPG/tools/resolve/main/glintr100.onnx && \
+    wget https://huggingface.co/MonsterMMORPG/tools/resolve/main/scrfd_10g_bnkps.onnx
+
+RUN cd /comfyui/models/loras && \
+    wget "https://civitai.com/api/download/models/806265?token=7023fecde509dba2117fd23654521ae2" -O retro.safetensors && \
+    wget "https://civitai.com/api/download/models/844922?token=7023fecde509dba2117fd23654521ae2" -O AK.safetensors && \
+    wget "https://civitai.com/api/download/models/744643?token=7023fecde509dba2117fd23654521ae2" -O ToonyStark.safetensors
+
+RUN cd /comfyui/models/checkpoints && \
+    wget "https://civitai.com/api/download/models/766472?token=7023fecde509dba2117fd23654521ae2" -O Simple_World.safetensors
+    # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Download checkpoints/vae/LoRA to include in image based on model type
